@@ -1,0 +1,50 @@
+# HestiaChain Configuration
+#
+# Copy this file to config/hestia_chain.yml and customize for your environment.
+#
+# HestiaChain supports multiple backends for different deployment stages:
+# - in_memory: Development and testing (data lost on restart)
+# - private: JSON file-based storage (Stage 1)
+# - public_testnet: Ethereum testnet like Base Sepolia (Stage 2)
+# - public_mainnet: Ethereum mainnet like Base (Stage 3)
+
+default: &default
+  enabled: true
+
+development:
+  <<: *default
+  backend: in_memory
+
+test:
+  <<: *default
+  backend: in_memory
+
+staging:
+  <<: *default
+  backend: private
+  private:
+    storage_path: storage/hestia_anchors.json
+    max_anchors: 100000
+
+production:
+  <<: *default
+  backend: public_mainnet
+  batching:
+    enabled: true
+    interval_seconds: 3600    # Flush every hour
+    max_batch_size: 100       # Or when 100 anchors queued
+  public_mainnet:
+    chain: base               # 'base' or 'ethereum'
+    rpc_url: <%= ENV['HESTIA_RPC_URL'] %>
+    contract_address: <%= ENV['HESTIA_CONTRACT_ADDRESS'] %>
+    private_key_env: HESTIA_PRIVATE_KEY
+
+# Alternative: Public testnet for staging
+# staging:
+#   <<: *default
+#   backend: public_testnet
+#   public_testnet:
+#     chain: base_sepolia
+#     rpc_url: <%= ENV['HESTIA_TESTNET_RPC_URL'] %>
+#     contract_address: <%= ENV['HESTIA_TESTNET_CONTRACT_ADDRESS'] %>
+#     private_key_env: HESTIA_TESTNET_PRIVATE_KEY

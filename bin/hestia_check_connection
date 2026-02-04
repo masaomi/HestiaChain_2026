@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# HestiaChain Connection Checker
+#
+# Verifies connection to Base Sepolia testnet and checks account balance.
+#
+# Usage:
+#   bin/hestia_check_connection
+#
+# Prerequisites:
+#   - eth gem installed (bundle install)
+#   - HESTIA_TESTNET_PRIVATE_KEY environment variable set
+
+require 'eth'
+
+RPC_URLS = {
+  'base_sepolia' => 'https://sepolia.base.org',
+  'sepolia' => 'https://rpc.sepolia.org',
+  'base_mainnet' => 'https://mainnet.base.org'
+}.freeze
+
+CHAIN_IDS = {
+  84532 => 'Base Sepolia (Testnet)',
+  11155111 => 'Ethereum Sepolia (Testnet)',
+  8453 => 'Base Mainnet',
+  1 => 'Ethereum Mainnet'
+}.freeze
+
+def format_eth(wei)
+  eth = wei.to_f / 1e18
+  format('%.6f ETH', eth)
+end
+
+puts '=' * 60
+puts 'HestiaChain Connection Checker'
+puts '=' * 60
+puts
+
+# Check for private key
+private_key = ENV['HESTIA_TESTNET_PRIVATE_KEY']
+
+if private_key.nil? || private_key.empty?
+  puts 'ERROR: HESTIA_TESTNET_PRIVATE_KEY environment variable not set'
+  puts
+  puts 'To generate a new key:'
+  puts '  bin/hestia_keygen'
+  puts
+  puts 'To set an existing key:'
+  puts '  export HESTIA_TESTNET_PRIVATE_KEY=your_private_key_here'
+  exit 1
+end
+
+# Load key
+begin
+  key = Eth::Key.new(priv: private_key)
+  puts "Account Address: #{key.address}"
+  puts
+rescue StandardError => e
+  puts "ERROR: Invalid private key: #{e.message}"
+  exit 1
+end
+
+# Test connections
+puts 'Testing network connections...'
+puts
+
+RPC_URLS.each do |name, url|
+  print "  #{name.ljust(15)}: "
+
+  begin
+    client = Eth::Client.create(url)
+    chain_id = client.chain_id
+    chain_name = CHAIN_IDS[chain_id] || "Unknown (#{chain_id})"
+
+    # Get balance
+    balance = client.get_balance(key.address)
+
+    puts "OK - #{chain_name}"
+    puts "  #{' ' * 17}Balance: #{format_eth(balance)}"
+
+    # Warn if no balance on testnet
+    if balance.zero? && name.include?('sepolia')
+      puts "  #{' ' * 17}⚠️  No balance! Get test ETH from faucet"
+    end
+  rescue StandardError => e
+    puts "FAILED - #{e.message}"
+  end
+
+  puts
+end
+
+puts '=' * 60
+puts 'Faucets for test ETH:'
+puts '=' * 60
+puts '  Base Sepolia:     https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet'
+puts '  Ethereum Sepolia: https://sepoliafaucet.com/'
+puts
+puts 'Next steps:'
+puts '  1. Get test ETH from faucet (if balance is 0)'
+puts '  2. Deploy smart contract: cd contracts && pnpm install && pnpm exec hardhat run scripts/deploy.js --network base_sepolia'
+puts '  3. Run integration test: bin/hestia_test_contract'

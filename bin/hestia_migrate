@@ -1,0 +1,175 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# HestiaChain Migration Tool
+#
+# Migrate anchors between backends (stages).
+#
+# Usage:
+#   hestia_migrate --from private --to public_testnet [options]
+#
+# Options:
+#   --from BACKEND      Source backend (in_memory, private, public_testnet)
+#   --to BACKEND        Destination backend (private, public_testnet, public_mainnet)
+#   --batch-size N      Number of anchors per batch (default: 50)
+#   --dry-run           Show what would be migrated without actually migrating
+#   --verify            Verify migration after completion
+#   --config PATH       Path to config file
+#   --help              Show this help message
+
+require 'optparse'
+require_relative '../lib/hestia_chain'
+
+options = {
+  batch_size: 50,
+  dry_run: false,
+  verify: false,
+  config_path: nil
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAM_NAME} --from BACKEND --to BACKEND [options]"
+
+  opts.on('--from BACKEND', 'Source backend') do |v|
+    options[:from] = v
+  end
+
+  opts.on('--to BACKEND', 'Destination backend') do |v|
+    options[:to] = v
+  end
+
+  opts.on('--batch-size N', Integer, 'Batch size (default: 50)') do |v|
+    options[:batch_size] = v
+  end
+
+  opts.on('--dry-run', 'Show what would be migrated') do
+    options[:dry_run] = true
+  end
+
+  opts.on('--verify', 'Verify migration after completion') do
+    options[:verify] = true
+  end
+
+  opts.on('--config PATH', 'Path to config file') do |v|
+    options[:config_path] = v
+  end
+
+  opts.on('-h', '--help', 'Show this help') do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+
+# Validate required options
+unless options[:from] && options[:to]
+  puts "Error: --from and --to are required"
+  puts parser
+  exit 1
+end
+
+# Load config
+config_options = {}
+if options[:config_path]
+  config = HestiaChain::Core::Config.load(path: options[:config_path])
+else
+  config = HestiaChain::Core::Config.load
+end
+
+# Create backends
+def create_backend(type, config)
+  backend_config = HestiaChain::Core::Config.new(
+    'backend' => type,
+    type => config.backend_config(type)
+  )
+  HestiaChain::Backend::Base.create(backend_config)
+end
+
+puts "=" * 60
+puts "HestiaChain Migration Tool"
+puts "=" * 60
+puts
+
+begin
+  from_backend = create_backend(options[:from], config)
+  to_backend = create_backend(options[:to], config)
+rescue StandardError => e
+  puts "Error creating backends: #{e.message}"
+  exit 1
+end
+
+puts "Source:      #{from_backend.backend_type}"
+puts "Destination: #{to_backend.backend_type}"
+puts
+
+migrator = HestiaChain::Migration::Migrator.new(
+  from_backend: from_backend,
+  to_backend: to_backend
+)
+
+if options[:dry_run]
+  puts "Performing dry run..."
+  puts
+  
+  result = migrator.dry_run
+  
+  puts "Dry Run Results:"
+  puts "  Total in source:          #{result[:total_in_source]}"
+  puts "  Already in destination:   #{result[:already_in_destination]}"
+  puts "  Would migrate:            #{result[:would_migrate]}"
+  puts
+  puts "Run without --dry-run to perform actual migration."
+else
+  puts "Starting migration..."
+  puts "Batch size: #{options[:batch_size]}"
+  puts
+
+  progress_callback = proc do |progress|
+    print "\rBatch #{progress[:batch]}/#{progress[:total_batches]} - " \
+          "Migrated: #{progress[:migrated]}, " \
+          "Skipped: #{progress[:skipped]}, " \
+          "Failed: #{progress[:failed]}"
+  end
+
+  result = migrator.migrate(
+    batch_size: options[:batch_size],
+    progress_callback: progress_callback
+  )
+
+  puts
+  puts
+  puts "Migration Results:"
+  puts "  Status:           #{result[:status]}"
+  puts "  Total processed:  #{result[:total]}"
+  puts "  Migrated:         #{result[:migrated]}"
+  puts "  Skipped:          #{result[:skipped]}"
+  puts "  Failed:           #{result[:failed]}"
+  puts "  Duration:         #{result[:duration_seconds]&.round(2)}s"
+
+  if result[:errors].any?
+    puts
+    puts "Errors (first 5):"
+    result[:errors].first(5).each do |error|
+      puts "  #{error[:anchor_hash][0, 16]}... - #{error[:error]}"
+    end
+  end
+
+  if options[:verify]
+    puts
+    puts "Verifying migration..."
+    
+    verification = migrator.verify(sample_size: 100)
+    
+    puts "Verification Results:"
+    puts "  Sample size:        #{verification[:sample_size]}"
+    puts "  Verified:           #{verification[:verified]}"
+    puts "  Missing:            #{verification[:missing]}"
+    puts "  Verification rate:  #{verification[:verification_rate]}%"
+  end
+end
+
+puts
+puts "=" * 60
+puts "Migration complete!"
+puts "=" * 60

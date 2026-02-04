@@ -1,0 +1,38 @@
+log/
+KairosChain_2026/
+
+# Sensitive files - NEVER commit these!
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Ruby
+*.gem
+.bundle/
+vendor/bundle/
+Gemfile.lock
+
+# Node.js (contracts)
+contracts/node_modules/
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+
+# Storage
+storage/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+coverage/
+spec/examples.txt

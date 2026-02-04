@@ -1,0 +1,220 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# HestiaChain Contract Integration Test
+#
+# Tests the full flow: create anchor → submit to blockchain → verify
+#
+# Usage:
+#   bin/hestia_test_contract
+#
+# Prerequisites:
+#   - eth gem installed
+#   - HESTIA_TESTNET_PRIVATE_KEY set
+#   - HESTIA_CONTRACT_ADDRESS set (after deploying contract)
+#   - Test ETH in your account
+
+require_relative '../lib/hestia_chain'
+require 'eth'
+
+puts '=' * 60
+puts 'HestiaChain Contract Integration Test'
+puts '=' * 60
+puts
+
+# Check environment
+private_key = ENV['HESTIA_TESTNET_PRIVATE_KEY']
+contract_address = ENV['HESTIA_CONTRACT_ADDRESS']
+
+if private_key.nil? || private_key.empty?
+  puts 'ERROR: HESTIA_TESTNET_PRIVATE_KEY not set'
+  puts 'Run: bin/hestia_keygen'
+  exit 1
+end
+
+if contract_address.nil? || contract_address.empty?
+  puts 'ERROR: HESTIA_CONTRACT_ADDRESS not set'
+  puts
+  puts 'You need to deploy the contract first:'
+  puts '  cd contracts'
+  puts '  pnpm install'
+  puts '  export PRIVATE_KEY=$HESTIA_TESTNET_PRIVATE_KEY'
+  puts '  pnpm exec hardhat run scripts/deploy.js --network base_sepolia'
+  puts
+  puts 'Then set the contract address:'
+  puts '  export HESTIA_CONTRACT_ADDRESS=0x...'
+  exit 1
+end
+
+puts "Private Key: #{private_key[0, 10]}...#{private_key[-6..]}"
+puts "Contract:    #{contract_address}"
+puts
+
+# Setup
+RPC_URL = 'https://sepolia.base.org'
+key = Eth::Key.new(priv: private_key)
+client = Eth::Client.create(RPC_URL)
+
+puts "Account:     #{key.address}"
+balance = client.get_balance(key.address)
+puts "Balance:     #{balance.to_f / 1e18} ETH"
+puts
+
+if balance.zero?
+  puts 'ERROR: No balance! Get test ETH from faucet first.'
+  puts 'Faucet: https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet'
+  exit 1
+end
+
+# Contract ABI (minimal)
+CONTRACT_ABI = [
+  {
+    'inputs' => [
+      { 'name' => 'anchorHash', 'type' => 'bytes32' },
+      { 'name' => 'anchorType', 'type' => 'string' }
+    ],
+    'name' => 'recordAnchor',
+    'outputs' => [{ 'name' => 'success', 'type' => 'bool' }],
+    'stateMutability' => 'nonpayable',
+    'type' => 'function'
+  },
+  {
+    'inputs' => [{ 'name' => 'anchorHash', 'type' => 'bytes32' }],
+    'name' => 'verifyAnchor',
+    'outputs' => [
+      { 'name' => 'exists', 'type' => 'bool' },
+      { 'name' => 'timestamp', 'type' => 'uint256' },
+      { 'name' => 'anchorType', 'type' => 'string' },
+      { 'name' => 'recorder', 'type' => 'address' }
+    ],
+    'stateMutability' => 'view',
+    'type' => 'function'
+  },
+  {
+    'inputs' => [],
+    'name' => 'totalAnchors',
+    'outputs' => [{ 'name' => '', 'type' => 'uint256' }],
+    'stateMutability' => 'view',
+    'type' => 'function'
+  }
+].freeze
+
+contract = Eth::Contract.from_abi(
+  abi: CONTRACT_ABI,
+  address: contract_address,
+  name: 'HestiaAnchor'
+)
+
+# Test 1: Check total anchors
+puts '=' * 60
+puts 'Test 1: Read total anchors (view call, no gas)'
+puts '=' * 60
+begin
+  total = client.call(contract, 'totalAnchors')
+  puts "Total anchors on contract: #{total}"
+  puts 'OK'
+rescue StandardError => e
+  puts "FAILED: #{e.message}"
+  exit 1
+end
+puts
+
+# Test 2: Create and record an anchor
+puts '=' * 60
+puts 'Test 2: Create and record anchor (transaction, uses gas)'
+puts '=' * 60
+
+# Create a test anchor using HestiaChain
+test_data = {
+  test_id: "integration_test_#{Time.now.to_i}",
+  message: 'Hello from HestiaChain!',
+  timestamp: Time.now.utc.iso8601
+}
+
+anchor = HestiaChain::Core::Anchor.new(
+  anchor_type: 'generic',
+  source_id: test_data[:test_id],
+  data_hash: Digest::SHA256.hexdigest(test_data.to_json),
+  metadata: { test: true }
+)
+
+puts "Anchor Hash:  #{anchor.anchor_hash}"
+puts "Anchor Type:  #{anchor.anchor_type}"
+puts "Source ID:    #{anchor.source_id}"
+puts
+
+# Convert to bytes32
+anchor_hash_bytes = [anchor.anchor_hash].pack('H*')
+
+puts 'Submitting to blockchain...'
+begin
+  tx_hash = client.transact(
+    contract,
+    'recordAnchor',
+    anchor_hash_bytes,
+    anchor.anchor_type,
+    sender_key: key,
+    gas_limit: 100_000
+  )
+  puts "Transaction submitted!"
+  puts "TX Hash: #{tx_hash}"
+  puts
+  puts 'Waiting for confirmation (this may take 10-30 seconds)...'
+
+  # Wait a bit for the transaction to be mined
+  sleep 15
+
+  puts 'OK - Transaction submitted'
+rescue StandardError => e
+  puts "FAILED: #{e.message}"
+  puts
+  puts 'This might be because:'
+  puts '  - Not enough ETH for gas'
+  puts '  - Anchor already exists'
+  puts '  - Network congestion'
+end
+puts
+
+# Test 3: Verify the anchor
+puts '=' * 60
+puts 'Test 3: Verify anchor exists (view call, no gas)'
+puts '=' * 60
+begin
+  result = client.call(contract, 'verifyAnchor', anchor_hash_bytes)
+  exists, timestamp, anchor_type, recorder = result
+
+  puts "Exists:      #{exists}"
+  puts "Timestamp:   #{Time.at(timestamp.to_i).utc}" if timestamp.to_i.positive?
+  puts "Type:        #{anchor_type}"
+  puts "Recorder:    #{recorder}"
+
+  if exists
+    puts
+    puts 'SUCCESS! Anchor recorded and verified on Base Sepolia!'
+  else
+    puts
+    puts 'Anchor not found - transaction may still be pending'
+    puts 'Try running this script again in a minute'
+  end
+rescue StandardError => e
+  puts "FAILED: #{e.message}"
+end
+puts
+
+# Summary
+puts '=' * 60
+puts 'Test Summary'
+puts '=' * 60
+puts
+puts 'What was tested:'
+puts '  1. Connected to Base Sepolia testnet'
+puts '  2. Created a HestiaChain anchor locally'
+puts '  3. Submitted anchor hash to smart contract'
+puts '  4. Verified anchor exists on blockchain'
+puts
+puts 'View on explorer:'
+puts "  https://sepolia.basescan.org/address/#{contract_address}"
+puts
+puts 'Next steps:'
+puts '  - If tests passed: Ready for KairosChain integration!'
+puts '  - If tests failed: Check error messages and retry'

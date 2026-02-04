@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# HestiaChain Key Generator
+#
+# Generates a new Ethereum private/public key pair for HestiaChain.
+#
+# Usage:
+#   bin/hestia_keygen
+#   bin/hestia_keygen --output .env.local
+#
+# WARNING: Keep your private key secure! Never commit it to version control.
+
+require 'eth'
+require 'optparse'
+
+options = {
+  output: nil,
+  env_var: 'HESTIA_TESTNET_PRIVATE_KEY'
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
+
+  opts.on('-o', '--output FILE', 'Output to file (e.g., .env.local)') do |v|
+    options[:output] = v
+  end
+
+  opts.on('-e', '--env-var NAME', 'Environment variable name (default: HESTIA_TESTNET_PRIVATE_KEY)') do |v|
+    options[:env_var] = v
+  end
+
+  opts.on('-h', '--help', 'Show this help') do
+    puts opts
+    exit
+  end
+end.parse!
+
+# Generate new key
+key = Eth::Key.new
+
+puts '=' * 60
+puts 'HestiaChain Key Generator'
+puts '=' * 60
+puts
+puts 'New key pair generated!'
+puts
+puts "Address:     #{key.address}"
+puts "Private Key: #{key.private_hex}"
+puts
+puts '=' * 60
+puts 'IMPORTANT SECURITY NOTES:'
+puts '=' * 60
+puts '1. NEVER share your private key with anyone'
+puts '2. NEVER commit your private key to git'
+puts '3. Store it securely (environment variable or secret manager)'
+puts '4. For testnet, losing the key is not critical (just generate a new one)'
+puts '5. For mainnet, backup your key securely!'
+puts
+
+if options[:output]
+  File.open(options[:output], 'a') do |f|
+    f.puts "# HestiaChain key generated at #{Time.now}"
+    f.puts "#{options[:env_var]}=#{key.private_hex}"
+    f.puts "HESTIA_ADDRESS=#{key.address}"
+    f.puts
+  end
+  puts "Key appended to #{options[:output]}"
+  puts
+  puts "To use:"
+  puts "  source #{options[:output]}"
+  puts "  # or add to your shell profile"
+else
+  puts 'To use this key, set the environment variable:'
+  puts
+  puts "  export #{options[:env_var]}=#{key.private_hex}"
+  puts
+  puts 'Or run with --output to save to a file:'
+  puts
+  puts "  #{$PROGRAM_NAME} --output .env.local"
+end
+
+puts
+puts 'Next steps:'
+puts '1. Get test ETH from faucet: https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet'
+puts "2. Use address: #{key.address}"
+puts '3. Run bin/hestia_check_connection to verify'
