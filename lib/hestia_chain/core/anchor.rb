@@ -41,6 +41,13 @@ module HestiaChain
     #
     class Anchor
       # Standard anchor types (custom types should use 'custom.' prefix)
+      #
+      # Core types:
+      #   meeting, generic, genomics, research, agreement, audit, release
+      #
+      # Protocol types (opt-in, require 'hestia_chain/protocol'):
+      #   philosophy_declaration, observation_log
+      #
       STANDARD_TYPES = %w[
         meeting
         generic
@@ -49,6 +56,8 @@ module HestiaChain
         agreement
         audit
         release
+        philosophy_declaration
+        observation_log
       ].freeze
 
       attr_reader :anchor_type,

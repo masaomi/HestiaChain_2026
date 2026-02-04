@@ -1,22 +1,47 @@
 # HestiaChain
 
-**Generic Private to Public Blockchain Migration Module**
+**A Post-Consensus Web3 Infrastructure for Proof-of-Existence and Philosophical Protocol**
 
-HestiaChain provides a pluggable backend system for recording proof-of-existence anchors, enabling smooth migration from private storage to public blockchains.
+[日本語版 README](README_jp.md)
+
+---
+
+## Overview
+
+HestiaChain is a pluggable blockchain anchoring system that enables smooth migration from private storage to public blockchains. It provides two layers:
+
+1. **Core Layer**: Generic proof-of-existence anchoring with pluggable backends
+2. **Protocol Layer** (opt-in): Philosophical protocol for inter-agent interaction without consensus
 
 ## Design Philosophy
 
 > **"History is not replayable, but reconstructible through cooperation."**
 
-HestiaChain is designed as a "witness/anchor" module that records only hashes (proof of existence), never the actual data. This ensures privacy while enabling auditability through cooperation between participants.
+HestiaChain records only hashes (proof of existence), never the actual data. This ensures privacy while enabling auditability through cooperation between participants.
+
+### Beyond DAO
+
+> **"How can we remain connected without deciding the same thing?"**
+
+The optional Protocol layer enables a post-consensus model where:
+- Meaning is not agreed upon; meaning coexists
+- Multiple interpretations of the same interaction are valid
+- Fade-out is a legitimate outcome, not a failure
 
 ## Features
 
+### Core Features
 - **Pluggable Backends**: Seamlessly switch between storage backends
 - **Stage-based Migration**: Move from development to production incrementally
 - **Batch Processing**: Optimize gas costs with batched submissions
 - **Generic Design**: Use with any application (Meeting Protocol, GenomicsChain, etc.)
 - **Privacy-Preserving**: Records only hashes, never content
+
+### Protocol Features (Opt-in)
+- **Philosophy Declaration**: Declare exchange philosophies without requiring consensus
+- **Observation Logging**: Record subjective observations of interactions
+- **Meaning Coexistence**: Support multiple interpretations of the same event
+- **Fade-out Support**: Natural relationship decay as a first-class outcome
 
 ## Stages
 
@@ -28,6 +53,8 @@ HestiaChain is designed as a "witness/anchor" module that records only hashes (p
 | 3 | `public_mainnet` | Ethereum mainnet (Base) |
 
 ## Quick Start
+
+### Basic Anchoring
 
 ```ruby
 require 'hestia_chain'
@@ -49,6 +76,35 @@ puts result[:anchor_hash]
 verification = client.verify(result[:anchor_hash])
 puts "Exists: #{verification[:exists]}"
 # => "Exists: true"
+```
+
+### Philosophy Protocol (Opt-in)
+
+```ruby
+require 'hestia_chain'
+require 'hestia_chain/protocol'  # Explicitly opt-in
+
+client = HestiaChain.client(backend: 'private')
+
+# 1. Declare your exchange philosophy
+declaration = HestiaChain::Protocol::PhilosophyDeclaration.new(
+  agent_id: 'my_agent',
+  philosophy_type: 'exchange',
+  philosophy_hash: Digest::SHA256.hexdigest(my_philosophy.to_json),
+  compatible_with: ['cooperative', 'observational'],
+  version: '1.0'
+)
+client.submit(declaration.to_anchor)
+
+# 2. Record an observation (subjective, not universal)
+observation = HestiaChain::Protocol::ObservationLog.new(
+  observer_id: 'my_agent',
+  observed_id: 'other_agent',
+  interaction_hash: Digest::SHA256.hexdigest(interaction.to_json),
+  observation_type: 'completed',
+  interpretation: { outcome: 'mutual_learning', compatibility: 'high' }
+)
+client.submit(observation.to_anchor)
 ```
 
 ## Installation
@@ -75,6 +131,12 @@ development:
   enabled: true
   backend: in_memory
 
+staging:
+  enabled: true
+  backend: private
+  private:
+    storage_path: storage/hestia_anchors.json
+
 production:
   enabled: true
   backend: public_mainnet
@@ -88,66 +150,9 @@ production:
     contract_address: <%= ENV['HESTIA_CONTRACT_ADDRESS'] %>
 ```
 
-## Usage Examples
+## Anchor Types
 
-### Basic Anchor
-
-```ruby
-require 'hestia_chain'
-require 'digest'
-
-client = HestiaChain.client
-
-# Create an anchor manually
-anchor = HestiaChain::Core::Anchor.new(
-  anchor_type: 'meeting',
-  source_id: 'session_abc123',
-  data_hash: Digest::SHA256.hexdigest(session_data.to_json),
-  participants: ['agent_a', 'agent_b'],
-  metadata: { message_count: 42 }
-)
-
-# Submit the anchor
-result = client.submit(anchor)
-```
-
-### Batch Processing
-
-```ruby
-# Enable batching for gas optimization
-client = HestiaChain.client(
-  backend: 'public_mainnet',
-  batching: { enabled: true, max_batch_size: 50 }
-)
-
-# Queue anchors for batch submission
-50.times do |i|
-  client.submit(anchor, async: true)
-end
-
-# Manually flush the batch
-client.flush_batch!
-```
-
-### Custom Anchor Types
-
-```ruby
-# Use standard types
-anchor = HestiaChain.anchor(
-  anchor_type: 'genomics',
-  source_id: 'nft_001',
-  data_hash: nft_metadata_hash
-)
-
-# Or define custom types
-anchor = HestiaChain.anchor(
-  anchor_type: 'custom.my_app.event',
-  source_id: 'event_123',
-  data_hash: event_hash
-)
-```
-
-## Standard Anchor Types
+### Core Types
 
 | Type | Description |
 |------|-------------|
@@ -160,11 +165,25 @@ anchor = HestiaChain.anchor(
 | `release` | Software release hashes |
 | `custom.*` | Custom application types |
 
+### Protocol Types (Opt-in)
+
+| Type | Description |
+|------|-------------|
+| `philosophy_declaration` | Exchange philosophy declarations |
+| `observation_log` | Interaction observation records |
+
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Applications (Meeting Protocol, GenomicsChain, etc.)           │
+│  Applications (Meeting Protocol, GenomicsChain, KairosChain)    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  HestiaChain Protocol (opt-in)                                  │
+│  ├── PhilosophyDeclaration                                      │
+│  └── ObservationLog                                             │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -189,16 +208,52 @@ anchor = HestiaChain.anchor(
 ┌─────────────────────────────────────────────────────────────────┐
 │  Storage Layer                                                  │
 │  ├── Memory / JSON File                                         │
-│  └── Ethereum (Base, etc.)                                      │
+│  └── Ethereum (Base L2)                                         │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Philosophy Protocol Details
+
+### PhilosophyDeclaration
+
+Declares an agent's exchange philosophy. This is observable, not enforceable.
+
+```ruby
+HestiaChain::Protocol::PhilosophyDeclaration.new(
+  agent_id: 'agent_001',           # Declaring agent
+  philosophy_type: 'exchange',      # exchange, interaction, or fadeout
+  philosophy_hash: '...',           # Hash of philosophy content (content stays private)
+  compatible_with: ['cooperative'], # Compatibility tags
+  version: '1.0'                    # Version for evolution tracking
+)
+```
+
+**Philosophy Types:**
+- `exchange`: Philosophy about skill exchange and sharing
+- `interaction`: Philosophy about general inter-agent interaction
+- `fadeout`: Philosophy about disengagement and relationship decay
+
+### ObservationLog
+
+Records subjective observations of interactions. Multiple interpretations can coexist.
+
+```ruby
+HestiaChain::Protocol::ObservationLog.new(
+  observer_id: 'agent_001',         # Who is observing
+  observed_id: 'agent_002',         # Who is being observed
+  interaction_hash: '...',          # Hash of interaction data
+  observation_type: 'completed',    # initiated, completed, faded, observed
+  interpretation: { ... }           # Subjective interpretation
+)
+```
+
+**Design Principle:** The same interaction can have different observations from different agents. Both are valid.
 
 ## Integration Examples
 
 ### Meeting Protocol Integration
 
 ```ruby
-# In your Meeting Protocol code
 class MeetingProtocolIntegration
   def initialize
     @hestia = HestiaChain.client
@@ -219,25 +274,31 @@ class MeetingProtocolIntegration
 end
 ```
 
-### GenomicsChain Integration
+### KairosChain Integration (Future)
 
 ```ruby
-# In your GenomicsChain code
-class GenomicsChainIntegration
-  def initialize
-    @hestia = HestiaChain.client
+require 'hestia_chain/protocol'
+
+class KairosChainIntegration
+  def declare_exchange_philosophy(agent, philosophy)
+    declaration = HestiaChain::Protocol::PhilosophyDeclaration.new(
+      agent_id: agent.id,
+      philosophy_type: 'exchange',
+      philosophy_hash: Digest::SHA256.hexdigest(philosophy.to_json),
+      compatible_with: philosophy[:compatible_with]
+    )
+    @hestia.submit(declaration.to_anchor)
   end
 
-  def anchor_nft(nft_metadata)
-    @hestia.anchor(
-      anchor_type: 'genomics',
-      source_id: nft_metadata[:token_id],
-      data: nft_metadata.to_json,
-      metadata: {
-        dataset_type: nft_metadata[:dataset_type],
-        minted_at: Time.now.iso8601
-      }
+  def record_skill_exchange_observation(observer, observed, interaction)
+    observation = HestiaChain::Protocol::ObservationLog.new(
+      observer_id: observer.id,
+      observed_id: observed.id,
+      interaction_hash: Digest::SHA256.hexdigest(interaction.to_json),
+      observation_type: 'completed',
+      interpretation: observer.interpret(interaction)
     )
+    @hestia.submit(observation.to_anchor)
   end
 end
 ```
@@ -249,18 +310,31 @@ For Stage 2/3 (public blockchain), deploy the HestiaAnchor contract:
 ```solidity
 // contracts/HestiaAnchor.sol
 contract HestiaAnchor {
-    event AnchorRecorded(bytes32 indexed anchorHash, uint256 timestamp);
+    event AnchorRecorded(bytes32 indexed anchorHash, string indexed anchorType, uint256 timestamp);
     
     mapping(bytes32 => bool) public anchors;
     mapping(bytes32 => uint256) public timestamps;
     
-    function recordAnchor(bytes32 anchorHash) external {
-        require(!anchors[anchorHash], "Anchor exists");
-        anchors[anchorHash] = true;
-        timestamps[anchorHash] = block.timestamp;
-        emit AnchorRecorded(anchorHash, block.timestamp);
-    }
+    function recordAnchor(bytes32 anchorHash, string calldata anchorType) external returns (bool);
+    function recordAnchors(bytes32[] calldata hashes, string[] calldata types) external returns (uint256);
+    function verifyAnchor(bytes32 anchorHash) external view returns (bool, uint256, string memory, address);
 }
+```
+
+## CLI Tools
+
+```bash
+# Generate Ethereum keypair
+bin/hestia_keygen
+
+# Check blockchain connection
+bin/hestia_check_connection
+
+# Test contract on testnet
+bin/hestia_test_contract
+
+# Migrate between backends
+bin/hestia_migrate --from private --to public_testnet
 ```
 
 ## Security Considerations
@@ -268,6 +342,7 @@ contract HestiaAnchor {
 - **Private Keys**: Never commit private keys. Use environment variables.
 - **Content Privacy**: HestiaChain only records hashes, never actual content.
 - **Batch Security**: Failed batches are re-queued, ensuring no data loss.
+- **Philosophy Privacy**: Philosophy content is hashed; only the hash is recorded on-chain.
 
 ## Development
 
@@ -280,6 +355,16 @@ bundle exec rspec
 
 # Run linter
 bundle exec rubocop
+
+# Run demo
+ruby examples/philosophy_protocol_demo.rb
+```
+
+## Test Results
+
+```
+118 examples, 0 failures
+Line Coverage: 82.17%
 ```
 
 ## License
@@ -290,4 +375,9 @@ MIT License - See [LICENSE](LICENSE) file.
 
 - [KairosChain](../KairosChain_2026): Memory-driven agent framework
 - [GenomicsChain](https://genomicschain.ch): Decentralized genomic data platform
-- [Meeting Protocol (MMP)](../KairosChain_2026/docs/MMP_Specification_Draft_v1.0.md): Agent-to-agent communication protocol
+
+## References
+
+- [Beyond DAO: Philosophy and Architecture](log/hestia_chain_beyond_dao_en_20260204.md)
+- [Implementation Log](log/hestiachain_implementation_log_20260204.md)
+- [Protocol Implementation Plan](log/hestiachain_philosophy_protocol_plan_20260204.md)
