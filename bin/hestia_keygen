@@ -61,8 +61,8 @@ puts
 if options[:output]
   File.open(options[:output], 'a') do |f|
     f.puts "# HestiaChain key generated at #{Time.now}"
-    f.puts "#{options[:env_var]}=#{key.private_hex}"
-    f.puts "HESTIA_ADDRESS=#{key.address}"
+    f.puts "export #{options[:env_var]}=#{key.private_hex}"
+    f.puts "export HESTIA_ADDRESS=#{key.address}"
     f.puts
   end
   puts "Key appended to #{options[:output]}"

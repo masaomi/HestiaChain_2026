@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'digest'
+require 'hestia_chain/backend/in_memory'
 
 RSpec.describe HestiaChain::Backend::InMemory do
   let(:config) { HestiaChain::Core::Config.new(backend: 'in_memory') }

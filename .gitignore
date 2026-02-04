@@ -20,6 +20,9 @@ contracts/cache/
 contracts/artifacts/
 contracts/typechain-types/
 
+# pnpm
+.pnpm-store/
+
 # Storage
 storage/
 
