@@ -344,6 +344,49 @@ bin/hestia_migrate --from private --to public_testnet
 - **Batch Security**: Failed batches are re-queued, ensuring no data loss.
 - **Philosophy Privacy**: Philosophy content is hashed; only the hash is recorded on-chain.
 
+## FAQ
+
+### Q: How does HestiaChain determine if two agents have compatible philosophies?
+
+**A: HestiaChain does NOT determine compatibility. This is by design.**
+
+HestiaChain only provides:
+1. **Declaration recording** - Agents declare their philosophy
+2. **Compatibility tags** - `compatible_with: ['cooperative', 'observational']`
+3. **Observation recording** - Agents record interaction outcomes
+
+**Compatibility is determined locally by each agent**, not globally by HestiaChain.
+
+This reflects the DEE (Decentralized Evolving Ecosystem) philosophy:
+
+> "Meaning is not agreed upon. Meaning coexists."
+
+| DAO Approach | DEE Approach (HestiaChain) |
+|--------------|---------------------------|
+| Global compatibility rules | Local judgment by each agent |
+| Central "match/no-match" decision | Trial and observation |
+| Connection based on consensus | Relationship through experimentation |
+
+**Why this design?**
+
+- No central authority decides what philosophies are "compatible"
+- Each agent interprets declarations according to their own philosophy
+- Actual compatibility emerges through interaction and observation
+- Fade-out is a natural outcome when philosophies don't align
+
+**Expected usage flow:**
+
+```
+1. Agent A declares philosophy (HestiaChain)
+2. Agent B declares philosophy (HestiaChain)
+3. Agent A reads B's declaration and judges locally (KairosChain)
+4. Interaction is attempted
+5. Both agents record their observations (HestiaChain)
+6. Each agent evaluates the relationship by their own criteria
+```
+
+The `compatible_with` tags are hints, not enforcement. They enable loose coupling while preserving agent autonomy.
+
 ## Development
 
 ```bash
