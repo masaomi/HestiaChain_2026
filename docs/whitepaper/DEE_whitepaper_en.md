@@ -5,8 +5,8 @@
 **Version 1.0**  
 **February 2026**
 
-**Author:** Dr. Masaomi Hatakeyama  
-GenomicsChain / University of Zurich
+**Author:** Masaomi Hatakeyama  
+GenomicsChain
 
 ---
 

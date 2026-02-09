@@ -5,8 +5,8 @@
 **Version 1.0**  
 **2026年2月**
 
-**著者:** 畠山 正臣 博士  
-GenomicsChain / チューリッヒ大学
+**著者:** Masaomi Hatakeyama
+GenomicsChain
 
 ---
 
