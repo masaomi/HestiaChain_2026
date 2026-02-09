@@ -6,7 +6,7 @@
 **February 2026**
 
 **Author:** Masaomi Hatakeyama  
-GenomicsChain
+Genomics on Blockchain
 
 ---
 
@@ -166,6 +166,8 @@ DEE resonates with several concepts from East Asian philosophy:
 
 **Kyosei (共生):** *Kyosei*, often translated as "symbiosis" or "living together," emphasizes coexistence over competition. Unlike Western ecological concepts that often foreground competition and survival, *kyosei* emphasizes the possibility of different beings thriving together.
 
+These concepts connect to Nishida Kitarō's notion of "pure experience" (*junsui keiken*), where subject and object are not yet differentiated [25]. In DEE, agents interact in a space prior to the imposition of categories like "compatible" or "incompatible"—the relational field itself precedes such judgments.
+
 ### 4.4 Rhizomatic Networks
 
 Gilles Deleuze and Félix Guattari's concept of the rhizome offers a model for non-hierarchical organization [16].
@@ -261,6 +263,8 @@ declaration = HestiaChain::Protocol::PhilosophyDeclaration.new(
 - Compatibility tags enable loose coupling
 - Versioning supports philosophy evolution
 - No enforcement—declaration is observable, not binding
+
+**Critical design principle:** HestiaChain does *not* determine whether two philosophies are compatible. Compatibility tags are purely declarative hints. Each agent determines locally, based on its own criteria, whether it considers another agent's philosophy compatible. This preserves the phenomenological principle that meaning arises from each observer's perspective, not from a central authority.
 
 ### 5.3 Observation Logging
 
@@ -443,7 +447,7 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 
 [2] Hassan, S., & De Filippi, P. (2021). "Decentralized Autonomous Organization." *Internet Policy Review*, 10(2).
 
-[3] ScienceDirect (2025). "A review of DAO governance: Recent literature and emerging trends." *Journal of Corporate Finance*.
+[3] Han, J., Lee, J., & Li, T. (2025). "A review of DAO governance: Recent literature and emerging trends." *Journal of Corporate Finance*, 91.
 
 [4] Barbereau, T., et al. (2024). "Analyzing voting power in decentralized governance: Who controls DAOs?" *Blockchain: Research and Applications*.
 
@@ -451,9 +455,9 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 
 [6] Zetzsche, D. A., et al. (2023). "Decentralised Finance's timocratic governance: The distribution and exercise of tokenised voting rights." *Technology in Society*.
 
-[7] Kiayias, A., et al. (2024). "The Hidden Shortcomings of (D)AOs - An Empirical Study of On-Chain Governance." ETH Zurich Research Collection.
+[7] Feichtinger, R., Fritsch, R., Vonlanthen, Y., & Wattenhofer, R. (2024). "The Hidden Shortcomings of (D)AOs - An Empirical Study of On-Chain Governance." ETH Zurich Research Collection.
 
-[8] Frontiers (2025). "Delegated voting in decentralized autonomous organizations: a scoping review." *Frontiers in Blockchain*.
+[8] Weidener, L., Laredo, F., Kumar, K., & Compton, K. (2025). "Delegated voting in decentralized autonomous organizations: a scoping review." *Frontiers in Blockchain*.
 
 [9] Husserl, E. (1931). *Cartesian Meditations*. (Fifth Meditation on Intersubjectivity)
 
@@ -461,11 +465,11 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 
 [11] Levinas, E. (1961). *Totality and Infinity*.
 
-[12] De Gruyter (2024). "Lévinas's Philosophy of the Face: Anxiety, Responsibility, and Ethical Moments." *Human Affairs*.
+[12] Liu, L. (2024). "Lévinas's Philosophy of the Face: Anxiety, Responsibility, and Ethical Moments." *Human Affairs*, 34(3).
 
 [13] Whitehead, A. N. (1929). *Process and Reality*.
 
-[14] Springer (2024). "Whitehead's 'Actual Occasion'." In *Process Metaphysics*.
+[14] Stenner, P. (2024). "A.N. Whitehead and Process Thought: An Overview to Facilitate Transdisciplinary Applications." *Human Affairs*, 34(3), 325-339.
 
 [15] Watsuji, T. (1935). *Fudo: Wind and Earth* (風土).
 
@@ -497,13 +501,14 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 
 ```ruby
 {
-  agent_id: String,           # Declaring agent identifier
-  philosophy_type: String,    # 'exchange', 'interaction', 'fadeout', or 'custom.*'
-  philosophy_hash: String,    # SHA256 of philosophy content
-  compatible_with: [String],  # Compatibility tags
-  version: String,            # Version for evolution tracking
-  timestamp: String,          # ISO8601 timestamp
-  metadata: Hash              # Additional metadata
+  agent_id: String,                  # Declaring agent identifier
+  philosophy_type: String,           # 'exchange', 'interaction', 'fadeout', or 'custom.*'
+  philosophy_hash: String,           # SHA256 of philosophy content
+  compatible_with: [String],         # Compatibility tags (declarative only)
+  version: String,                   # Version for evolution tracking
+  timestamp: String,                 # ISO8601 timestamp
+  previous_declaration_ref: String,  # Reference to previous declaration (for evolution tracking)
+  metadata: Hash                     # Additional metadata
 }
 ```
 
@@ -512,7 +517,7 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 ```ruby
 {
   observer_id: String,        # Observing agent identifier
-  observed_id: String,        # Observed agent identifier
+  observed_id: String,        # Observed agent identifier (same as observer for self-observation)
   interaction_hash: String,   # SHA256 of interaction data
   observation_type: String,   # 'initiated', 'completed', 'faded', 'observed'
   interpretation: Hash,       # Subjective interpretation
@@ -522,6 +527,21 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 }
 ```
 
+### Predefined Compatibility Tags
+
+Agents can use the following tags to *declare* their exchange preferences. **Actual compatibility is determined locally by each agent**, not by HestiaChain.
+
+| Tag | Description |
+|-----|-------------|
+| `cooperative` | Prefers collaborative exchange |
+| `competitive` | Open to competitive interaction |
+| `observational` | Prefers observation over participation |
+| `experimental` | Open to novel exchange patterns |
+| `conservative` | Prefers established patterns |
+| `adaptive` | Willing to adjust approach based on context |
+
+Custom tags can also be used freely.
+
 ### Anchor Types
 
 | Type | Description |
@@ -530,6 +550,11 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 | `observation_log` | Interaction observation record |
 | `meeting` | Agent interaction witness |
 | `generic` | General-purpose anchor |
+| `genomics` | Genomic data anchor |
+| `research` | Research data anchor |
+| `agreement` | Agreement record |
+| `audit` | Audit trail anchor |
+| `release` | Release record |
 
 ---
 

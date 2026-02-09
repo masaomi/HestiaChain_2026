@@ -5,8 +5,8 @@
 **Version 1.0**  
 **2026年2月**
 
-**著者:** Masaomi Hatakeyama
-GenomicsChain
+**著者:** Masaomi Hatakeyama  
+Genomics on Blockchain
 
 ---
 
@@ -160,9 +160,11 @@ DEEは東アジア哲学のいくつかの概念と共鳴する：
 
 **間（Ma）:** 日本語の概念「間」は、物と物の間の空間を指す—空虚な空間ではなく、意味が生じる関係的空間。DEEにおいて、関係性は個々のエージェントの属性ではなく、エージェント間の「間」に存在する[15]。
 
-**揺らぎ（Yuragi）:** 「揺らぎ」は秩序ではなく無秩序の源としての変動や振動を指す。日本の伝統的美学は、機械的に完璧な均一性よりも手作りの物のわずかな変化を重視する。DEEは「揺らぎ」を健全なシステムの構成要素として受け入れる。
+**揺らぎ（Yuragi）:** 「揺らぎ」は無秩序ではなく秩序の源としての変動や振動を指す。日本の伝統的美学は、機械的に完璧な均一性よりも手作りの物のわずかな変化を重視する。DEEは「揺らぎ」を健全なシステムの構成要素として受け入れる。
 
 **共生（Kyosei）:** 「共生」は、しばしば "symbiosis" や "living together" と訳され、競争よりも共存を強調する。競争と生存を前景化することが多い西洋の生態学的概念とは異なり、「共生」は異なる存在が共に繁栄する可能性を強調する。
+
+これらの概念は、西田幾多郎の「純粋経験」（*junsui keiken*）の概念と接続する。純粋経験とは、主客がまだ分化していない状態を指す[25]。DEEにおいて、エージェントは「互換」「非互換」といったカテゴリーが付与される以前の空間で相互作用する——関係の場そのものが、そうした判断に先行するのである。
 
 ### 4.4 リゾーム的ネットワーク
 
@@ -258,6 +260,8 @@ declaration = HestiaChain::Protocol::PhilosophyDeclaration.new(
 - バージョニングが哲学の進化をサポート
 - 強制なし—宣言は観測可能であり、拘束力はない
 
+**重要な設計原則:** HestiaChainは二つの哲学が互換性を持つかどうかを判定*しない*。互換性タグは純粋に宣言的なヒントである。各エージェントが、自身の基準に基づいて、他のエージェントの哲学と互換性があるかどうかをローカルに判定する。これにより、意味は中央の権威からではなく各観測者の視点から生まれるという現象学的原則が保たれる。
+
 ### 5.3 観測ログ
 
 エージェントは`ObservationLog`を通じて観測を記録する：
@@ -294,6 +298,19 @@ fadeout = HestiaChain::Protocol::ObservationLog.new(
 
 フェードアウトは判断なしに記録される。それは失敗、裏切り、または紛争ではない—単に関係的軌跡の自然な終わりである。
 
+### 5.5 プラガブルバックエンドアーキテクチャ
+
+HestiaChainはステージベースのマイグレーションをサポートする：
+
+| ステージ | バックエンド | 目的 |
+|----------|-------------|------|
+| 0 | InMemory | 開発・テスト |
+| 1 | Private (JSON) | ローカル永続化 |
+| 2 | PublicTestnet | Base Sepolia テスト |
+| 3 | PublicMainnet | 本番環境 (Base L2) |
+
+哲学宣言はいずれのバックエンドでも機能する。最終的にパブリックチェーンにアンカーリングすることで、宣言が検閲不可能になる一方、解釈と実行はプライベートに保たれる。
+
 ---
 
 ## 6. 関連研究との比較
@@ -322,6 +339,10 @@ DEEはこれらの仮定を緩和する：
 - 均衡は求められない—関係性は揺らぐ
 - 整合を強制するメカニズムはない—調整を共存が置き換える
 
+### 6.3 連合学習とプライバシー保護ML
+
+連合学習は、中央集権化なしに分散データを横断したモデル訓練を可能にする。DEEはローカル計算とプライバシーへの重視を共有する。しかし、連合学習は依然としてグローバルモデルを求める；DEEは哲学的多様性そのものを目的として維持する。
+
 ---
 
 ## 7. ユースケース
@@ -348,6 +369,10 @@ GenomicsChainはDEE原則を科学的コラボレーションに適用する。�
 - 紛争なしに非生産的なコラボレーションからフェードアウトできる
 
 これは、主権を尊重しつつコラボレーションを可能にする倫理的で進化可能な科学インフラストラクチャというFUTURE²のビジョンと接続する。
+
+### 7.3 オープンソースコミュニティ
+
+大規模なオープンソースプロジェクトは、フォーク、ライセンスの相違、多様なメンテナンスの哲学が共存する分散型エコシステムとして自然に運営されている。DEEはこのパターンを形式化する：コントリビューターは自らの参加哲学を宣言し、コラボレーションの観測を記録し、プロジェクトの方向性が分岐したときに建設的にフェードアウトすることができる。
 
 ---
 
@@ -412,7 +437,7 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
 
 [2] Hassan, S., & De Filippi, P. (2021). "Decentralized Autonomous Organization." *Internet Policy Review*, 10(2).
 
-[3] ScienceDirect (2025). "A review of DAO governance: Recent literature and emerging trends." *Journal of Corporate Finance*.
+[3] Han, J., Lee, J., & Li, T. (2025). "A review of DAO governance: Recent literature and emerging trends." *Journal of Corporate Finance*, 91.
 
 [4] Barbereau, T., et al. (2024). "Analyzing voting power in decentralized governance: Who controls DAOs?" *Blockchain: Research and Applications*.
 
@@ -420,9 +445,9 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
 
 [6] Zetzsche, D. A., et al. (2023). "Decentralised Finance's timocratic governance: The distribution and exercise of tokenised voting rights." *Technology in Society*.
 
-[7] Kiayias, A., et al. (2024). "The Hidden Shortcomings of (D)AOs - An Empirical Study of On-Chain Governance." ETH Zurich Research Collection.
+[7] Feichtinger, R., Fritsch, R., Vonlanthen, Y., & Wattenhofer, R. (2024). "The Hidden Shortcomings of (D)AOs - An Empirical Study of On-Chain Governance." ETH Zurich Research Collection.
 
-[8] Frontiers (2025). "Delegated voting in decentralized autonomous organizations: a scoping review." *Frontiers in Blockchain*.
+[8] Weidener, L., Laredo, F., Kumar, K., & Compton, K. (2025). "Delegated voting in decentralized autonomous organizations: a scoping review." *Frontiers in Blockchain*.
 
 [9] Husserl, E. (1931). *Cartesian Meditations*. (第五省察：間主観性について)
 
@@ -430,11 +455,11 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
 
 [11] Levinas, E. (1961). *Totality and Infinity*.（『全体性と無限』）
 
-[12] De Gruyter (2024). "Lévinas's Philosophy of the Face: Anxiety, Responsibility, and Ethical Moments." *Human Affairs*.
+[12] Liu, L. (2024). "Lévinas's Philosophy of the Face: Anxiety, Responsibility, and Ethical Moments." *Human Affairs*, 34(3).
 
 [13] Whitehead, A. N. (1929). *Process and Reality*.（『過程と実在』）
 
-[14] Springer (2024). "Whitehead's 'Actual Occasion'." In *Process Metaphysics*.
+[14] Stenner, P. (2024). "A.N. Whitehead and Process Thought: An Overview to Facilitate Transdisciplinary Applications." *Human Affairs*, 34(3), 325-339.
 
 [15] 和辻哲郎 (1935). 『風土』
 
@@ -466,13 +491,14 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
 
 ```ruby
 {
-  agent_id: String,           # 宣言エージェント識別子
-  philosophy_type: String,    # 'exchange', 'interaction', 'fadeout', または 'custom.*'
-  philosophy_hash: String,    # 哲学内容のSHA256
-  compatible_with: [String],  # 互換性タグ
-  version: String,            # 進化追跡のためのバージョン
-  timestamp: String,          # ISO8601タイムスタンプ
-  metadata: Hash              # 追加メタデータ
+  agent_id: String,                  # 宣言エージェント識別子
+  philosophy_type: String,           # 'exchange', 'interaction', 'fadeout', または 'custom.*'
+  philosophy_hash: String,           # 哲学内容のSHA256
+  compatible_with: [String],         # 互換性タグ（宣言的のみ）
+  version: String,                   # 進化追跡のためのバージョン
+  timestamp: String,                 # ISO8601タイムスタンプ
+  previous_declaration_ref: String,  # 前回宣言への参照（進化追跡用）
+  metadata: Hash                     # 追加メタデータ
 }
 ```
 
@@ -481,7 +507,7 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
 ```ruby
 {
   observer_id: String,        # 観測エージェント識別子
-  observed_id: String,        # 観測対象エージェント識別子
+  observed_id: String,        # 観測対象エージェント識別子（自己観測の場合はobserverと同一）
   interaction_hash: String,   # 相互作用データのSHA256
   observation_type: String,   # 'initiated', 'completed', 'faded', 'observed'
   interpretation: Hash,       # 主観的解釈
@@ -490,6 +516,35 @@ HestiaChainはブロックチェーンインフラストラクチャ上の哲学
   metadata: Hash              # 追加メタデータ
 }
 ```
+
+### 定義済み互換性タグ
+
+エージェントは以下のタグを使用して交換の好みを*宣言*できる。**実際の互換性の判定は各エージェントがローカルに行う**ものであり、HestiaChainが判定するものではない。
+
+| タグ | 説明 |
+|------|------|
+| `cooperative` | 協力的な交換を好む |
+| `competitive` | 競争的な相互作用に対してオープン |
+| `observational` | 参加よりも観察を好む |
+| `experimental` | 新しい交換パターンに対してオープン |
+| `conservative` | 確立されたパターンを好む |
+| `adaptive` | コンテキストに基づいてアプローチを調整する意思がある |
+
+カスタムタグも自由に使用可能。
+
+### アンカータイプ
+
+| タイプ | 説明 |
+|--------|------|
+| `philosophy_declaration` | エージェント哲学宣言 |
+| `observation_log` | 相互作用観測記録 |
+| `meeting` | エージェント相互作用証人 |
+| `generic` | 汎用アンカー |
+| `genomics` | ゲノムデータアンカー |
+| `research` | 研究データアンカー |
+| `agreement` | 合意記録 |
+| `audit` | 監査証跡アンカー |
+| `release` | リリース記録 |
 
 ---
 
