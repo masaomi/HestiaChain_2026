@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAO vs DEE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #ffffff;
+    color: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .container {
+    width: 1200px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 48px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1a1a2e;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+
+  .comparison {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  .side {
+    flex: 1;
+    border-radius: 14px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .side::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .dao-side {
+    background: #f0f6ff;
+    border: 1px solid #bfd4ef;
+  }
+  .dao-side::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+
+  .dee-side {
+    background: #f5f0ff;
+    border: 1px solid #d4c4ef;
+  }
+  .dee-side::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+  .side-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .side-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .dao-side .side-icon { background: rgba(37,99,235,0.1); }
+  .dee-side .side-icon { background: rgba(124,58,237,0.1); }
+
+  .side-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .dao-side .side-title { color: #1e40af; }
+  .dee-side .side-title { color: #5b21b6; }
+
+  .side-desc {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  /* Network Diagrams */
+  .network-diagram {
+    width: 100%;
+    height: 180px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .network-diagram svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Properties */
+  .props { display: flex; flex-direction: column; gap: 12px; }
+
+  .prop {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .dao-side .prop { background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.12); }
+  .dee-side .prop { background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.12); }
+
+  .prop-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .dao-side .prop-icon { background: rgba(37,99,235,0.08); }
+  .dee-side .prop-icon { background: rgba(124,58,237,0.08); }
+
+  .prop-label {
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .dao-side .prop-label { color: #1e40af; }
+  .dee-side .prop-label { color: #5b21b6; }
+
+  .prop-value { color: #374151; font-size: 13px; }
+
+  /* Center divider */
+  .vs-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 48px;
+  }
+
+  .vs-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(180deg, rgba(37,99,235,0.25), rgba(156,163,175,0.2), rgba(124,58,237,0.25));
+    border-radius: 1px;
+  }
+
+  .vs-badge {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 1px;
+  }
+
+  /* Bottom principle */
+  .principle {
+    text-align: center;
+    padding: 24px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+  }
+
+  .principle-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .principle-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2937;
+    line-height: 1.6;
+  }
+
+  .principle-text .dao-hl { color: #1e40af; font-weight: 600; }
+  .principle-text .dee-hl { color: #5b21b6; font-weight: 600; }
+
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="title">DAO vs DEE</div>
+  <div class="subtitle">Two Complementary Worldviews for Decentralized Communities</div>
+
+  <div class="comparison">
+    <!-- DAO Side -->
+    <div class="side dao-side">
+      <div class="side-header">
+        <div class="side-icon">&#x1F3DB;</div>
+        <div>
+          <div class="side-title">DAO</div>
+          <div class="side-desc">Decentralized Autonomous Organization</div>
+        </div>
+      </div>
+
+      <div class="network-diagram">
+        <svg viewBox="0 0 440 180">
+          <!-- Central consensus node -->
+          <circle cx="220" cy="90" r="28" fill="rgba(37,99,235,0.08)" stroke="#2563eb" stroke-width="2"/>
+          <text x="220" y="86" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600" font-family="Inter">CON-</text>
+          <text x="220" y="98" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600" font-family="Inter">SENSUS</text>
+
+          <!-- Agent nodes connected to center -->
+          <line x1="110" y1="50" x2="195" y2="78" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="110" y1="130" x2="195" y2="102" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="330" y1="50" x2="245" y2="78" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="330" y1="130" x2="245" y2="102" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="170" y1="160" x2="205" y2="115" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="270" y1="160" x2="235" y2="115" stroke="#3b82f6" stroke-width="1.5"/>
+          <line x1="220" y1="20" x2="220" y2="62" stroke="#3b82f6" stroke-width="1.5"/>
+
+          <!-- Agent circles - all same color (homogeneous) -->
+          <circle cx="110" cy="50" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="110" y="54" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">A</text>
+
+          <circle cx="110" cy="130" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="110" y="134" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">B</text>
+
+          <circle cx="330" cy="50" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="330" y="54" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">C</text>
+
+          <circle cx="330" cy="130" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="330" y="134" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">D</text>
+
+          <circle cx="170" cy="160" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="170" y="164" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">E</text>
+
+          <circle cx="270" cy="160" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="270" y="164" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">F</text>
+
+          <circle cx="220" cy="20" r="16" fill="rgba(37,99,235,0.1)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="220" y="24" text-anchor="middle" fill="#1e40af" font-size="9" font-family="Inter">G</text>
+
+          <!-- Vote arrows -->
+          <text x="155" y="42" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="Inter" opacity="0.7">vote</text>
+          <text x="285" y="42" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="Inter" opacity="0.7">vote</text>
+        </svg>
+      </div>
+
+      <div class="props">
+        <div class="prop">
+          <div class="prop-icon">&#x1F517;</div>
+          <div>
+            <div class="prop-label">Coupling</div>
+            <div class="prop-value">Tight &mdash; consensus binds all agents</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x2696;</div>
+          <div>
+            <div class="prop-label">Order</div>
+            <div class="prop-value">Top-down via agreement</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F5F3;</div>
+          <div>
+            <div class="prop-label">Mechanism</div>
+            <div class="prop-value">Voting &rarr; single decision</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x26A1;</div>
+          <div>
+            <div class="prop-label">Conflict</div>
+            <div class="prop-value">Fork (community splits)</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F4CA;</div>
+          <div>
+            <div class="prop-label">Diversity</div>
+            <div class="prop-value">Reduced by majority rule</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VS Divider -->
+    <div class="vs-divider">
+      <div class="vs-line"></div>
+      <div class="vs-badge">VS</div>
+      <div class="vs-line"></div>
+    </div>
+
+    <!-- DEE Side -->
+    <div class="side dee-side">
+      <div class="side-header">
+        <div class="side-icon">&#x1F331;</div>
+        <div>
+          <div class="side-title">DEE</div>
+          <div class="side-desc">Decentralized Evolving Ecosystem</div>
+        </div>
+      </div>
+
+      <div class="network-diagram">
+        <svg viewBox="0 0 440 180">
+          <!-- Loose connections between agents (no center) -->
+          <!-- Cluster 1 -->
+          <line x1="100" y1="60" x2="170" y2="90" stroke="#7c3aed" stroke-width="1" opacity="0.35" stroke-dasharray="4,4"/>
+          <line x1="100" y1="60" x2="140" y2="140" stroke="#7c3aed" stroke-width="1" opacity="0.25" stroke-dasharray="4,4"/>
+          <line x1="170" y1="90" x2="140" y2="140" stroke="#7c3aed" stroke-width="1" opacity="0.4" stroke-dasharray="4,4"/>
+
+          <!-- Cluster 2 -->
+          <line x1="300" y1="50" x2="350" y2="110" stroke="#a78bfa" stroke-width="1" opacity="0.35" stroke-dasharray="4,4"/>
+          <line x1="300" y1="50" x2="260" y2="130" stroke="#a78bfa" stroke-width="1" opacity="0.25" stroke-dasharray="4,4"/>
+          <line x1="350" y1="110" x2="260" y2="130" stroke="#a78bfa" stroke-width="1" opacity="0.4" stroke-dasharray="4,4"/>
+
+          <!-- Cross-cluster (very faint) -->
+          <line x1="170" y1="90" x2="260" y2="130" stroke="#9ca3af" stroke-width="0.8" opacity="0.2" stroke-dasharray="6,6"/>
+          <line x1="140" y1="140" x2="300" y2="50" stroke="#9ca3af" stroke-width="0.8" opacity="0.12" stroke-dasharray="6,6"/>
+
+          <!-- Fading agent -->
+          <line x1="220" y1="30" x2="170" y2="90" stroke="#9ca3af" stroke-width="0.8" opacity="0.12" stroke-dasharray="8,8"/>
+
+          <!-- Agents - different colors (heterogeneous) -->
+          <circle cx="100" cy="60" r="16" fill="rgba(124,58,237,0.1)" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="100" y="64" text-anchor="middle" fill="#5b21b6" font-size="9" font-family="Inter">A</text>
+
+          <circle cx="170" cy="90" r="16" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="170" y="94" text-anchor="middle" fill="#6d28d9" font-size="9" font-family="Inter">B</text>
+
+          <circle cx="140" cy="140" r="16" fill="rgba(124,58,237,0.12)" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="140" y="144" text-anchor="middle" fill="#5b21b6" font-size="9" font-family="Inter">C</text>
+
+          <circle cx="300" cy="50" r="16" fill="rgba(167,139,250,0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="300" y="54" text-anchor="middle" fill="#6d28d9" font-size="9" font-family="Inter">D</text>
+
+          <circle cx="350" cy="110" r="16" fill="rgba(124,58,237,0.1)" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="350" y="114" text-anchor="middle" fill="#5b21b6" font-size="9" font-family="Inter">E</text>
+
+          <circle cx="260" cy="130" r="16" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="260" y="134" text-anchor="middle" fill="#6d28d9" font-size="9" font-family="Inter">F</text>
+
+          <!-- Fading agent (semi-transparent) -->
+          <circle cx="220" cy="30" r="16" fill="rgba(156,163,175,0.06)" stroke="#9ca3af" stroke-width="1" opacity="0.4"/>
+          <text x="220" y="34" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="Inter" opacity="0.5">G</text>
+          <text x="220" y="58" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="Inter" opacity="0.45" font-style="italic">fade-out</text>
+
+          <!-- Labels -->
+          <text x="125" y="18" text-anchor="middle" fill="#7c3aed" font-size="8" font-family="Inter" opacity="0.55">cluster</text>
+          <text x="310" y="18" text-anchor="middle" fill="#a78bfa" font-size="8" font-family="Inter" opacity="0.55">cluster</text>
+        </svg>
+      </div>
+
+      <div class="props">
+        <div class="prop">
+          <div class="prop-icon">&#x1F30A;</div>
+          <div>
+            <div class="prop-label">Coupling</div>
+            <div class="prop-value">Loose &mdash; declarative, probabilistic</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F331;</div>
+          <div>
+            <div class="prop-label">Order</div>
+            <div class="prop-value">Bottom-up via fluctuation (yuragi)</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F441;</div>
+          <div>
+            <div class="prop-label">Mechanism</div>
+            <div class="prop-value">Observation &rarr; coexisting interpretations</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F343;</div>
+          <div>
+            <div class="prop-label">Conflict</div>
+            <div class="prop-value">Fade-out (gradual disengagement)</div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="prop-icon">&#x1F33F;</div>
+          <div>
+            <div class="prop-label">Diversity</div>
+            <div class="prop-value">Essential for resilience</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom principle -->
+  <div class="principle">
+    <div class="principle-label">The Loose Coupling Principle</div>
+    <div class="principle-text">
+      <span class="dao-hl">DAO</span> = Tight Coupling (top-down control via consensus)<br>
+      <span class="dee-hl">DEE</span> = Loose Coupling (bottom-up emergence via fluctuation)<br>
+      <span style="color: #6b7280; font-size: 14px;">Not replacement, but complementary worldviews</span>
+    </div>
+  </div>
+
+  <div class="footer">Hatakeyama, M. (2026) &mdash; DEE White Paper &mdash; HestiaChain</div>
+</div>
+</body>
+</html>

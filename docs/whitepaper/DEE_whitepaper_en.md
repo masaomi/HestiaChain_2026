@@ -106,6 +106,10 @@ We propose that DAO and DEE represent complementary worldviews, appropriate for 
 | Order source | Agreement | Fluctuation |
 | Diversity | Tolerated | Essential |
 
+![Fig. 1: DAO vs DEE — Two complementary worldviews for decentralized communities. DAO employs tight coupling through central consensus, while DEE operates through loose coupling with emergent clusters and fade-out as a natural process.](assets/dao_vs_dee_diagram.png)
+
+*Fig. 1: DAO vs DEE — Two complementary worldviews for decentralized communities.*
+
 **DAO** is appropriate when convergence is needed: allocating shared resources, establishing rules that bind all participants, making collective decisions that require unified action.
 
 **DEE** is appropriate when diversity is valuable: exploring different approaches, maintaining relationships across philosophical differences, allowing natural selection of ideas without forced consensus.
