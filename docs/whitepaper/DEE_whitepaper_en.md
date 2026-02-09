@@ -393,6 +393,43 @@ DEE relaxes these assumptions:
 
 Federated learning enables model training across distributed data without centralization. DEE shares the emphasis on local computation and privacy. However, federated learning still seeks a global model; DEE maintains philosophical diversity as an end in itself.
 
+### 6.4 Intersubjectivity in Existing Protocols
+
+The term "intersubjectivity" has recently entered the Web3 vocabulary, most notably through the **EIGEN token** (EigenLayer) [30] and the **Hetu Protocol** [31]. Both deserve comparison with DEE's use of the concept.
+
+EigenLayer introduces the EIGEN token as a "Universal Intersubjective Work Token" to handle faults that cannot be cryptographically verified but on which "all reasonable observers" would agree—such as data withholding or oracle manipulation [30]. The mechanism resolves disputes through *token forking*: social consensus determines the canonical fork. This is a significant innovation, but its notion of intersubjectivity remains fundamentally **convergent**—it assumes that reasonable observers will ultimately agree, and the forking mechanism enforces resolution.
+
+DEE employs intersubjectivity in its phenomenological sense (Husserl, Levinas): the irreducible subjectivity of each observer, where multiple valid interpretations coexist *without resolution*. In DEE, two agents may observe the same interaction and record genuinely different interpretations, neither of which is "correct." This is not a dispute to be resolved but a structural feature of the system.
+
+| | EigenLayer EIGEN | Hetu Protocol | DEE |
+|---|---|---|---|
+| Intersubjectivity means | "Reasonable observers agree" | "Shared understanding" | "Irreducible perspectives coexist" |
+| Goal | Dispute resolution via forking | Censorship-resistant consensus | Meaning coexistence without resolution |
+| Mechanism | Token forking (social consensus) | PoCW + PoSA dual consensus | Observation logs (no consensus required) |
+| Philosophical basis | Pragmatic (engineering) | Epistemic (knowledge) | Phenomenological (experience) |
+
+### 6.5 Value Diversity in Multi-Agent Communities
+
+Recent empirical research by Pang et al. (2025) at Microsoft Research demonstrates that value diversity in LLM-based multi-agent communities enhances value stability and fosters emergent creative behaviors [32]. Using Schwartz's Theory of Basic Human Values, they show that heterogeneous communities develop more creative collective principles without external guidance—providing empirical support for DEE's theoretical claim that diversity is essential for system resilience (Section 4.5.7).
+
+Critically, their research also identifies a threshold: extreme heterogeneity induces instability, suggesting diminishing returns at high levels of diversity. This finding has implications for DEE's open questions (Section 8): while DEE advocates philosophical diversity, there may be practical limits to the degree of heterogeneity a community can sustain. The fade-out mechanism may serve as a natural regulator—agents whose philosophies diverge too far from any community cluster disengage organically, maintaining diversity within a functional range.
+
+### 6.6 Exit Mechanisms: Ragequit vs. Fade-out
+
+Moloch DAO's *ragequit* mechanism [33] allows dissenting members to withdraw their proportional treasury stake during a grace period after a proposal passes. Rooted in Hirschman's Exit-Voice-Loyalty framework, ragequit represents a protest-driven exit: members leave *because* they disagree with a specific decision.
+
+DEE's fade-out differs philosophically:
+
+| | Ragequit (Moloch DAO) | Fade-out (DEE) |
+|---|---|---|
+| Trigger | Disagreement with specific proposal | Natural divergence of trajectories |
+| Emotional valence | Protest, dissatisfaction | Neutral—no judgment |
+| Temporality | Discrete (grace period) | Gradual (continuous) |
+| Outcome | Complete exit with assets | Relationship dissolution without rupture |
+| Underlying model | Democratic dissent | Ecological disengagement |
+
+Ragequit is a valuable mechanism within the DAO paradigm. Fade-out operates within a different paradigm entirely: one where disengagement is not a reaction to conflict but a natural phase of relational dynamics.
+
 ---
 
 ## 7. Use Cases
@@ -546,6 +583,14 @@ We do not propose DEE as a replacement for DAO, but as an expansion of possibili
 [28] Kauffman, S. (1993). *The Origins of Order: Self-Organization and Selection in Evolution*. Oxford University Press.
 
 [29] Simon, H. A. (1962). "The Architecture of Complexity." *Proceedings of the American Philosophical Society*, 106(6), 467-482.
+
+[30] EigenLayer. (2024). "EIGEN: The Universal Intersubjective Work Token." https://www.blog.eigenlayer.xyz/eigen/
+
+[31] Hetu Protocol. (2024). "Intersubjectivity in Blockchain." https://blog.hetu.org/intersubjectivity-in-blockchain
+
+[32] Pang, R., et al. (2025). "On the Dynamics of Multi-Agent LLM Communities Driven by Value Diversity." *EMNLP 2025*.
+
+[33] Moloch DAO. (2019). "Ragequit: Minority Protection in DAOs." https://molochdao.com/
 
 ---
 
