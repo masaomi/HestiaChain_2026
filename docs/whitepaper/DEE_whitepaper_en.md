@@ -8,6 +8,8 @@
 **Author:** Masaomi Hatakeyama  
 Genomics on Blockchain
 
+**DOI:** [10.5281/zenodo.18583107](https://doi.org/10.5281/zenodo.18583107)
+
 ---
 
 ## Abstract
@@ -717,6 +719,12 @@ This integration addresses the ethical turn in open science catalyzed by CBD COP
 **Rhizome:** Deleuze and Guattari's concept of non-hierarchical network organization.
 
 **Yuragi (揺らぎ):** Japanese term for fluctuation as source of order.
+
+---
+
+## Appendix D: Implementation Status
+
+HestiaChain, a Ruby implementation of DEE's recording layer, is currently under development with pluggable backends supporting gradual migration from private to public blockchain. The source code is available at [https://github.com/mshatat/HestiaChain_2026](https://github.com/mshatat/HestiaChain_2026).
 
 ---
 

@@ -8,6 +8,8 @@
 **著者:** Masaomi Hatakeyama  
 Genomics on Blockchain
 
+**DOI:** [10.5281/zenodo.18583107](https://doi.org/10.5281/zenodo.18583107)
+
 ---
 
 ## 概要（Abstract）
@@ -707,6 +709,12 @@ FUTURE²は以下を統合する：
 **リゾーム:** 非階層的ネットワーク組織に対するドゥルーズとガタリの概念。
 
 **揺らぎ（Yuragi）:** 秩序の源泉としての変動を意味する日本語。
+
+---
+
+## 付録D：実装状況
+
+HestiaChainは、DEEの記録層のRuby実装であり、プライベートからパブリックブロックチェーンへの段階的移行をサポートするプラガブルバックエンドを備えて現在開発中です。ソースコードは [https://github.com/mshatat/HestiaChain_2026](https://github.com/mshatat/HestiaChain_2026) で公開されています。
 
 ---
 
